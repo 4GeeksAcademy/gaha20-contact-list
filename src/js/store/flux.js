@@ -1,83 +1,143 @@
 const getState = ({ getStore, getActions, setStore }) => {
+	const url = "https://playground.4geeks.com/apis/fake/contact/";
 	return {
-		store: {
-			baseURL: "https://playground.4geeks.com/apis/fake/contact/",
-			contactList: [],
+	  store: {
+		demo: [
+		  {
+			title: "FIRST",
+			background: "white",
+			initial: "white",
 		  },
-		  actions: {
-			getContacts: async function () {
-			  let store = getStore();
-			  try {
-				const response = await fetch(`${store.baseURL}/agenda/gaha20`);
-				// waits until the request completes...
-				console.log(response);
-				if (response.ok) {
-				  let data = await response.json();
-				  setStore({ contactList: data });
-				  console.log(data);
-				}
-			  } catch (error) {
-				console.log(error);
-			  }
-			},
-			addContacts: async function (data) {
-			  let store = getStore();
-			  try {
-				const response = await fetch(`${store.baseURL}`, {
-				  method: "POST",
-				  headers: {
-					"Content-Type": "application/json",
-				  },
-				  body: JSON.stringify(data),
-				});
-				if (response.ok) {
-				  getActions().getContacts();
-				  return true;
-				} else {
-				  return false;
-				}
-			  } catch (error) {
-				console.log(error);
-			  }
-			},
-			removeContacts: async function (id) {
-			  let store = getStore();
-			  try {
-				const response = await fetch(`${store.baseURL}${id}`, {
-				  method: "DELETE",
-				  headers: {
-					"Content-Type": "application/json",
-				  },
-				});
-				if (response.ok) {
-				  getActions().getContacts();
-				}
-			  } catch (error) {
-				console.log(error);
-			  }
-			},
-			updateContacts: async function (data, id) {
-			  let store = getStore();
-			  try {
-				const response = await fetch(`${store.baseURL}${id}`, {
-				  method: "PUT",
-				  headers: {
-					"Content-Type": "application/json",
-				  },
-				  body: JSON.stringify(data),
-				});
-				if (response.ok) {
-				  getActions().getContacts();
-				  return true;
-				} else {
-				  return false;
-				}
-			  } catch (error) {
-				console.log(error);
-			  }
-			},
+		  {
+			title: "SECOND",
+			background: "white",
+			initial: "white",
 		  },
-		};
-	  };
-	  
-	  export default getState;
+		],
+  
+		contacts: [],
+	  },
+	  actions: {
+		// Use getActions to call a function within a fuction
+		exampleFunction: () => {
+		  getActions().changeColor(0, "green");
+		},
+		loadSomeData: () => {
+		  /**
+					  fetch().then().then(data => setStore({ "foo": data.bar }))
+				  */
+		},
+		changeColor: (index, color) => {
+		  //get the store
+		  const store = getStore();
+  
+		  //we have to loop the entire demo array to look for the respective index
+		  //and change its color
+		  const demo = store.demo.map((elm, i) => {
+			if (i === index) elm.background = color;
+			return elm;
+		  });
+  
+		  //reset the global store
+		  setStore({ demo: demo });
+		},
+  
+		CreateContactBook: async (full_name, email, address, phone) => {
+		  try {
+			const response = await fetch(url, {
+			  method: "POST",
+			  body: JSON.stringify({
+				full_name: full_name,
+				email: email,
+				agenda_slug: "gaha20",
+				address: address,
+				phone: phone,
+			  }),
+			  headers: {
+				"content-type": "Application/json",
+			  },
+			});
+  
+			if (response.ok) {
+			  const actions = getActions();
+			  actions.ContactsList();
+			  return await response.json();
+			} else {
+			  return console.log("Contact already exists");
+			}
+		  } catch (error) {
+			return console.log("Post error: ", error);
+		  }
+		},
+  
+		ContactsList: async () => {
+		  const store = getStore();
+  
+		  try {
+			const response = await fetch(url + "agenda/gaha20", {
+			  method: "GET",
+			  headers: {
+				"content-type": "Application/json",
+			  },
+			});
+  
+			if (response.ok) {
+			  const body = await response.json();
+			  setStore({ contacts: body });
+			  return;
+			}
+		  } catch (error) {
+			console.log(error);
+		  }
+		},
+  
+		DeleteContact: async (contact_id) => {
+		  try {
+			const response = await fetch(url + `${contact_id}`, {
+			  method: "DELETE",
+			  headers: {
+				"content-type": "Application/json",
+			  },
+			});
+  
+			if (response.ok) {
+			  const actions = getActions();
+			  actions.ContactsList();
+			  console.log("Deleted");
+			}
+		  } catch (error) {
+			console.log(error);
+		  }
+		},
+  
+		UpdateContact: async (contact_id, full_name, email, address, phone) => {
+		  console.log("Contact id: ", contact_id);
+		  try {
+			const response = await fetch(url + `${contact_id}`, {
+			  method: "PUT",
+			  body: JSON.stringify({
+				full_name: full_name,
+				email: email,
+				agenda_slug: "gaha20",
+				address: address,
+				phone: phone,
+			  }),
+			  headers: {
+				"content-type": "Application/json",
+			  },
+			});
+  
+			if (response.ok) {
+			  console.log("Correctly updated");
+			  const actions = getActions();
+			  actions.ContactsList();
+			}
+		  } catch (error) {
+			console.log(error);
+		  }
+		},
+	  },
+	};
+  };
+  
+  export default getState;
