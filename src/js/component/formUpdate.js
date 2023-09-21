@@ -1,5 +1,5 @@
-import React, { useContext, useState } from "react";
-import { Link, Route } from "react-router-dom";
+import React, { useContext, useState, useEffect } from "react";
+import { Link, Route, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 
 export const FormUpdate = ({ contact_id }) => {
@@ -9,11 +9,27 @@ export const FormUpdate = ({ contact_id }) => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const navigate = useNavigate();
 
   const handleUpdateContact = (event) => {
     event.preventDefault();
     actions.UpdateContact(contact_id, full_name, email, address, phone);
+    navigate("/")
   };
+
+  useEffect(() => {
+    handleData()
+  }, []);
+
+  const handleData = async () => {
+    const getOneContact = await actions.GetContact(contact_id);
+    console.log(getOneContact)
+    setFull_name(getOneContact.full_name)
+    setEmail(getOneContact.email)
+    setPhone(getOneContact.phone)
+    setAddress(getOneContact.address)
+
+  }
 
   return (
     <React.Fragment>

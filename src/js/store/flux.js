@@ -14,7 +14,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			initial: "white",
 		  },
 		],
-  
+		contact: {},
 		contacts: [],
 	  },
 	  actions: {
@@ -109,6 +109,27 @@ const getState = ({ getStore, getActions, setStore }) => {
 			console.log(error);
 		  }
 		},
+
+		GetContact: async (contact_id) => {
+			console.log("Contact id: ", contact_id);
+			try {
+			  const response = await fetch(url + `${contact_id}`, {
+				method: "GET",
+				headers: {
+				  "content-type": "Application/json",
+				},
+			  });
+			  if (response.ok) {
+				console.log("Correct GET");
+				const actions = getActions();
+				const body = await response.json();
+			  	setStore({ contact: body });
+			  	return body; 
+			  }
+			} catch (error) {
+			  console.log(error);
+			}
+		  },
   
 		UpdateContact: async (contact_id, full_name, email, address, phone) => {
 		  console.log("Contact id: ", contact_id);
